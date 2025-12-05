@@ -360,6 +360,7 @@ body.dark-mode .selector-list button.active {
   /* make only the task list scrollable */
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px 0 20px 0;
   min-height: 0; /* important inside flex */
 }
@@ -786,7 +787,7 @@ body.dark-mode .calendar-tasks-container h3 {
 .calendar-task-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 12px;
   background: #f9f9f9;
   border-radius: 6px;
@@ -813,6 +814,62 @@ body.dark-mode .calendar-task-card:hover {
 .calendar-task-card strong {
   font-size: 14px;
   color: #333;
+}
+
+.calendar-task-card .calendar-task-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0; /* allow content to shrink and wrap */
+}
+
+.calendar-task-card .calendar-task-content small {
+  color: #666;
+  font-size: 12px;
+  margin-top: 6px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.calendar-task-card .task-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* Generic task card used in MyChores */
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.card > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0; /* important for flex children to allow wrapping */
+}
+
+.card strong {
+  display: block;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.card small {
+  display: block;
+  color: #666;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.card .task-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
 }
 
 body.dark-mode .calendar-task-card strong {

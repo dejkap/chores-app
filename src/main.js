@@ -732,8 +732,11 @@ async function updateCalendarTaskPreview() {
       taskPreviewList.innerHTML = tasksForDate
         .map((t) => `
           <div class="calendar-task-card" style="border-left-color: ${t.priority === 'high' ? '#dc3545' : t.priority === 'low' ? '#28a745' : '#007bff'};">
-            <strong style="flex-grow: 1;">${t.name}</strong>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div class="calendar-task-content">
+              <strong>${t.name}</strong>
+              ${t.description ? `<small>${t.description}</small>` : ''}
+            </div>
+            <div class="task-actions">
               <button class="task-action-icon calendar-task-edit" data-task-id="${t.id}" title="Edit task">✏️</button>
               <button class="task-action-icon calendar-task-delete" data-task-id="${t.id}" title="Delete task">🗑️</button>
             </div>
