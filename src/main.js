@@ -2,6 +2,7 @@ import { MyChores } from "./pages/MyChores.js";
 import { Calendar } from "./pages/Calendar.js";
 import { Stats } from "./pages/Stats.js";
 import { Settings } from "./pages/Settings.js";
+import { getTasks, addTask, updateTask, deleteTask } from './supabaseClient.js';
 
 const app = document.getElementById("app");
 
@@ -201,8 +202,8 @@ function loadPage(page) {
 }
 
 // --- Update Stats ---
-function updateStats() {
-  const tasks = JSON.parse(localStorage.getItem("chores") || "[]");
+async function updateStats() {
+  const tasks = await getTasks();
   const todoCount = tasks.filter((t) => !t.done).length;
   const doneCount = tasks.filter((t) => t.done).length;
   const totalCount = tasks.length;
@@ -240,24 +241,37 @@ function setupSettingsListeners() {
 
   // Export tasks as JSON
   if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      const tasks = localStorage.getItem("chores") || "[]";
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(tasks);
-      const downloadAnchor = document.createElement("a");
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "chores_export.json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      document.body.removeChild(downloadAnchor);
+    exportBtn.addEventListener("click", async () => {
+      try {
+        const tasks = await getTasks();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "chores_export.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+      } catch (err) {
+        console.error('Error exporting tasks', err);
+        alert('Failed to export tasks');
+      }
     });
   }
 
   // Clear all tasks
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
+    clearBtn.addEventListener("click", async () => {
       if (confirm("Are you sure you want to delete all tasks? This cannot be undone.")) {
-        localStorage.removeItem("chores");
-        alert("All tasks have been cleared.");
+        try {
+          const tasks = await getTasks();
+          for (const t of tasks) {
+            await deleteTask(t.id);
+          }
+          alert("All tasks have been cleared.");
+        } catch (err) {
+          console.error('Error clearing tasks', err);
+          alert('Failed to clear tasks.');
+        }
       }
     });
   }
@@ -315,7 +329,7 @@ function setupTaskListeners() {
   });
 
   // --- Uložení tasku ---
-  saveBtn.addEventListener("click", () => {
+  saveBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const description = descInput.value.trim();
     const date = dateInput.value;
@@ -325,21 +339,22 @@ function setupTaskListeners() {
       return;
     }
 
-    const tasks = JSON.parse(localStorage.getItem("chores") || "[]");
+    try {
+      await addTask({
+        name,
+        description,
+        priority: selectedPriority,
+        done: false,
+        date: date,
+      });
 
-    tasks.push({
-      id: Date.now(),
-      name,
-      description,
-      priority: selectedPriority,
-      done: false,
-      date: date,
-    });
-
-    localStorage.setItem("chores", JSON.stringify(tasks));
-    renderTasks();
-    modal.classList.add("hidden");
-    clearModal();
+      await renderTasks();
+      modal.classList.add("hidden");
+      clearModal();
+    } catch (err) {
+      console.error("Error adding task:", err);
+      alert("Failed to add task. See console for details.");
+    }
   });
 
   // --- Funkce na vyčištění modalu ---
@@ -567,7 +582,7 @@ function setupCalendarTaskModal() {
   });
 
   // Save task
-  saveBtn.addEventListener("click", () => {
+  saveBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const description = descInput.value.trim();
     const date = dateInput.value;
@@ -577,47 +592,49 @@ function setupCalendarTaskModal() {
       return;
     }
 
-    const tasks = JSON.parse(localStorage.getItem("chores") || "[]");
+    try {
+      await addTask({
+        name,
+        description,
+        priority: selectedPriority,
+        done: false,
+        date: date,
+      });
 
-    tasks.push({
-      id: Date.now(),
-      name,
-      description,
-      priority: selectedPriority,
-      done: false,
-      date: date,
-    });
-
-    localStorage.setItem("chores", JSON.stringify(tasks));
-    modal.dataset.isCalendarTask = "false";
-    loadPage("calendar");
+      modal.dataset.isCalendarTask = "false";
+      loadPage("calendar");
+    } catch (err) {
+      console.error('Error adding calendar task', err);
+      alert('Failed to add task for calendar.');
+    }
   });
 }
 
 // --- Setup Calendar Task Actions (Edit/Delete) ---
-function setupCalendarTaskActions() {
-  const tasks = JSON.parse(localStorage.getItem("chores") || "[]");
-
+async function setupCalendarTaskActions() {
   // Edit Calendar Tasks
   document.querySelectorAll(".calendar-task-edit").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const taskId = Number(btn.dataset.taskId);
-      const task = tasks.find((t) => t.id === taskId);
-      if (task) {
-        openEditModalForCalendar(task);
+      try {
+        const tasks = await getTasks();
+        const task = tasks.find((t) => Number(t.id) === taskId);
+        if (task) openEditModalForCalendar(task);
+      } catch (err) {
+        console.error('Error fetching tasks for edit', err);
       }
     });
   });
 
   // Delete Calendar Tasks
   document.querySelectorAll(".calendar-task-delete").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const taskId = Number(btn.dataset.taskId);
-      const index = tasks.findIndex((t) => t.id === taskId);
-      if (index > -1) {
-        tasks.splice(index, 1);
-        localStorage.setItem("chores", JSON.stringify(tasks));
-        updateCalendarTaskPreview();
+      try {
+        await deleteTask(taskId);
+        await updateCalendarTaskPreview();
+      } catch (err) {
+        console.error('Error deleting task', err);
       }
     });
   });
@@ -652,12 +669,12 @@ function openEditModalForCalendar(task) {
 }
 
 // --- Update Calendar Task Preview ---
-function updateCalendarTaskPreview() {
+async function updateCalendarTaskPreview() {
   const storedDate = localStorage.getItem("calendarSelectedDate");
   const selectedDate = storedDate ? new Date(storedDate) : new Date();
   const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
 
-  const tasks = JSON.parse(localStorage.getItem("chores") || "[]");
+  const tasks = await getTasks();
   const tasksForDate = tasks.filter((t) => t.date === dateStr);
 
   const taskPreviewList = document.getElementById("taskPreviewList");
@@ -678,7 +695,7 @@ function updateCalendarTaskPreview() {
         .join("");
       
       // Setup edit/delete handlers for calendar tasks
-      setupCalendarTaskActions();
+      await setupCalendarTaskActions();
     }
   }
 }
@@ -752,11 +769,11 @@ function sortTasks(tasks, sortOrder) {
 }
 
 // --- Render Tasků ---
-function renderTasks() {
+async function renderTasks() {
   const taskListContainer = document.getElementById("taskList");
   if (!taskListContainer) return;
 
-  let tasks = JSON.parse(localStorage.getItem("chores") || "[]");
+  const tasks = await getTasks();
 
   // Get current date for filtering
   const storedDate = localStorage.getItem("myChoresCurrentDate");
@@ -857,30 +874,30 @@ function renderTasks() {
   taskListContainer.innerHTML = html;
 
   // --- Sort dropdown listener ---
-  document.getElementById("sortDropdown")?.addEventListener("change", (e) => {
+  document.getElementById("sortDropdown")?.addEventListener("change", async (e) => {
     localStorage.setItem("taskSortOrder", e.target.value);
-    renderTasks();
+    await renderTasks();
   });
 
   // --- Section toggle listeners ---
   document.querySelectorAll(".section-header").forEach((header) => {
-    header.addEventListener("click", () => {
+    header.addEventListener("click", async () => {
       const section = header.dataset.section;
       const isExpanded = localStorage.getItem(`${section}Expanded`) !== "false";
       localStorage.setItem(`${section}Expanded`, !isExpanded);
-      renderTasks();
+      await renderTasks();
     });
   });
 
   // --- Checkbox listener ---
   document.querySelectorAll("#taskList input[type=checkbox]").forEach((checkbox) => {
-    checkbox.addEventListener("change", (e) => {
+    checkbox.addEventListener("change", async (e) => {
       const id = Number(e.target.dataset.id);
-      const index = tasks.findIndex((t) => t.id === id);
-      if (index > -1) {
-        tasks[index].done = e.target.checked;
-        localStorage.setItem("chores", JSON.stringify(tasks));
-        renderTasks();
+      try {
+        await updateTask(id, { done: e.target.checked });
+        await renderTasks();
+      } catch (err) {
+        console.error('Error updating task done flag', err);
       }
     });
   });
@@ -888,19 +905,27 @@ function renderTasks() {
   // --- Edit / Delete ---
   document.querySelectorAll("#taskList button").forEach((btn) => {
     const id = Number(btn.dataset.id);
-    const index = tasks.findIndex((t) => t.id === id);
 
-    if (btn.dataset.action === "edit" && index > -1) {
-      btn.addEventListener("click", () => {
-        openEditModal(tasks[index]);
+    if (btn.dataset.action === "edit") {
+      btn.addEventListener("click", async () => {
+        try {
+          const tasksNow = await getTasks();
+          const task = tasksNow.find((t) => Number(t.id) === id);
+          if (task) openEditModal(task);
+        } catch (err) {
+          console.error('Error fetching task for edit', err);
+        }
       });
     }
 
-    if (btn.dataset.action === "delete" && index > -1) {
-      btn.addEventListener("click", () => {
-        tasks.splice(index, 1);
-        localStorage.setItem("chores", JSON.stringify(tasks));
-        renderTasks();
+    if (btn.dataset.action === "delete") {
+      btn.addEventListener("click", async () => {
+        try {
+          await deleteTask(id);
+          await renderTasks();
+        } catch (err) {
+          console.error('Error deleting task', err);
+        }
       });
     }
   });
@@ -965,7 +990,7 @@ function setupEditModalListeners() {
   });
 
   // --- Save edited task ---
-  saveEditBtn.addEventListener("click", () => {
+  saveEditBtn.addEventListener("click", async () => {
     const taskId = Number(editModal.dataset.taskId);
     const isCalendarTask = editModal.dataset.isCalendarTask === "true";
     const newName = editNameInput.value.trim();
@@ -976,31 +1001,32 @@ function setupEditModalListeners() {
       return;
     }
 
-    let tasks = JSON.parse(localStorage.getItem("chores") || "[]");
-    const index = tasks.findIndex((t) => t.id === taskId);
+    try {
+      const updates = {
+        name: newName,
+        description: newDesc,
+        priority: selectedEditPriority,
+      };
 
-    if (index > -1) {
-      tasks[index].name = newName;
-      tasks[index].description = newDesc;
-      tasks[index].priority = selectedEditPriority;
-
-      // Update date if it's a calendar task
       if (isCalendarTask && editDateInput) {
-        tasks[index].date = editDateInput.value;
+        updates.date = editDateInput.value;
       }
 
-      localStorage.setItem("chores", JSON.stringify(tasks));
-      
+      await updateTask(taskId, updates);
+
       // Refresh appropriate view
       if (isCalendarTask) {
-        updateCalendarTaskPreview();
+        await updateCalendarTaskPreview();
       } else {
-        renderTasks();
+        await renderTasks();
       }
-      
+
       editModal.classList.add("hidden");
       editModal.dataset.taskId = "";
       editModal.dataset.isCalendarTask = "false";
+    } catch (err) {
+      console.error('Error saving edited task', err);
+      alert('Failed to save task edit.');
     }
   });
 }
