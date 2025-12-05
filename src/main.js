@@ -217,6 +217,37 @@ async function updateStats() {
   if (totalEl) totalEl.textContent = totalCount;
 }
 
+// --- Validation helpers ---
+function validateFieldLengths(name, description) {
+  if (name.length > 50) return { ok: false, message: 'Task name must be at most 50 characters.' };
+  if (description.length > 200) return { ok: false, message: 'Description must be at most 200 characters.' };
+  return { ok: true };
+}
+
+/**
+ * Validate before adding a task.
+ * If ignoreTaskId is provided, that task is excluded from counts (useful for edits).
+ */
+async function validateBeforeAdd(name, description, date, ignoreTaskId = null) {
+  // Field lengths
+  const fld = validateFieldLengths(name, description);
+  if (!fld.ok) return fld;
+
+  // Fetch tasks once
+  const tasks = await getTasks();
+
+  // Total limit applies only when adding a new task (ignoreTaskId == null)
+  if (!ignoreTaskId) {
+    if (tasks.length >= 200) return { ok: false, message: 'Total task limit reached (200). Please delete some tasks before adding more.' };
+  }
+
+  // Daily limit: count tasks for the date, excluding ignoreTaskId
+  const dailyCount = tasks.filter((t) => t.date === date && String(t.id) !== String(ignoreTaskId)).length;
+  if (dailyCount >= 20) return { ok: false, message: `Daily task limit reached (20) for ${date}.` };
+
+  return { ok: true };
+}
+
 // --- Setup Settings Listeners ---
 function setupSettingsListeners() {
   const notifyCheckbox = document.getElementById("notifyCheckbox");
@@ -336,6 +367,13 @@ function setupTaskListeners() {
 
     if (!name) {
       alert("Task must have a name!");
+      return;
+    }
+
+    // Validate before adding
+    const valid = await validateBeforeAdd(name, description, date, null);
+    if (!valid.ok) {
+      alert(valid.message);
       return;
     }
 
@@ -589,6 +627,13 @@ function setupCalendarTaskModal() {
 
     if (!name) {
       alert("Task must have a name!");
+      return;
+    }
+
+    // Validate before adding (for calendar modal)
+    const valid = await validateBeforeAdd(name, description, date, null);
+    if (!valid.ok) {
+      alert(valid.message);
       return;
     }
 
@@ -1009,6 +1054,12 @@ function setupEditModalListeners() {
       alert("Task ID not found!");
       return;
     }
+    // Validate field lengths
+    const fld = validateFieldLengths(newName, newDesc);
+    if (!fld.ok) {
+      alert(fld.message);
+      return;
+    }
 
     try {
       const updates = {
@@ -1019,6 +1070,18 @@ function setupEditModalListeners() {
 
       if (isCalendarTask && editDateInput) {
         updates.date = editDateInput.value;
+
+        // If date changed, ensure daily limit not exceeded (exclude this task)
+        const tasks = await getTasks();
+        const current = tasks.find((t) => String(t.id) === String(taskId));
+        const newDate = updates.date;
+        if (current && current.date !== newDate) {
+          const dailyCount = tasks.filter((t) => t.date === newDate && String(t.id) !== String(taskId)).length;
+          if (dailyCount >= 20) {
+            alert(`Daily task limit reached (20) for ${newDate}.`);
+            return;
+          }
+        }
       }
 
       await updateTask(taskId, updates);
