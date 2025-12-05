@@ -615,10 +615,11 @@ async function setupCalendarTaskActions() {
   // Edit Calendar Tasks
   document.querySelectorAll(".calendar-task-edit").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const taskId = Number(btn.dataset.taskId);
+      const taskId = btn.dataset.taskId; // Keep as string (UUID)
+      if (!taskId) return;
       try {
         const tasks = await getTasks();
-        const task = tasks.find((t) => Number(t.id) === taskId);
+        const task = tasks.find((t) => t.id === taskId);
         if (task) openEditModalForCalendar(task);
       } catch (err) {
         console.error('Error fetching tasks for edit', err);
@@ -629,7 +630,8 @@ async function setupCalendarTaskActions() {
   // Delete Calendar Tasks
   document.querySelectorAll(".calendar-task-delete").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const taskId = Number(btn.dataset.taskId);
+      const taskId = btn.dataset.taskId; // Keep as string (UUID)
+      if (!taskId) return;
       try {
         await deleteTask(taskId);
         await updateCalendarTaskPreview();
@@ -892,7 +894,8 @@ async function renderTasks() {
   // --- Checkbox listener ---
   document.querySelectorAll("#taskList input[type=checkbox]").forEach((checkbox) => {
     checkbox.addEventListener("change", async (e) => {
-      const id = Number(e.target.dataset.id);
+      const id = e.target.dataset.id; // Keep as string (UUID)
+      if (!id) return;
       try {
         await updateTask(id, { done: e.target.checked });
         await renderTasks();
@@ -904,13 +907,14 @@ async function renderTasks() {
 
   // --- Edit / Delete ---
   document.querySelectorAll("#taskList button").forEach((btn) => {
-    const id = Number(btn.dataset.id);
+    const id = btn.dataset.id; // Keep as string (UUID)
+    if (!id) return;
 
     if (btn.dataset.action === "edit") {
       btn.addEventListener("click", async () => {
         try {
           const tasksNow = await getTasks();
-          const task = tasksNow.find((t) => Number(t.id) === id);
+          const task = tasksNow.find((t) => t.id === id);
           if (task) openEditModal(task);
         } catch (err) {
           console.error('Error fetching task for edit', err);
@@ -991,13 +995,18 @@ function setupEditModalListeners() {
 
   // --- Save edited task ---
   saveEditBtn.addEventListener("click", async () => {
-    const taskId = Number(editModal.dataset.taskId);
+    const taskId = editModal.dataset.taskId; // Keep as string (UUID)
     const isCalendarTask = editModal.dataset.isCalendarTask === "true";
     const newName = editNameInput.value.trim();
     const newDesc = editDescInput.value.trim();
 
     if (!newName) {
       alert("Task must have a name!");
+      return;
+    }
+
+    if (!taskId) {
+      alert("Task ID not found!");
       return;
     }
 
