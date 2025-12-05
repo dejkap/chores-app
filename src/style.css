@@ -816,6 +816,12 @@ body.dark-mode .calendar-task-card:hover {
   color: #333;
 }
 
+/* Ensure calendar title wraps nicely on narrow screens */
+.calendar-task-card .calendar-task-content strong {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .calendar-task-card .calendar-task-content {
   display: flex;
   flex-direction: column;
@@ -828,6 +834,30 @@ body.dark-mode .calendar-task-card:hover {
   font-size: 12px;
   margin-top: 6px;
   word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Title handling: allow multi-line wrapping but limit to 3 lines with ellipsis
+   for very long titles. Also ensure extremely long words are broken so layout
+   doesn't overflow. Applied to both MyChores (.card) and Calendar (.calendar-task-card). */
+.card strong,
+.calendar-task-card .calendar-task-content strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* show up to 3 lines */
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word; /* break long words */
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Description handling: wrap fully and break long words to avoid overflow. */
+.card small,
+.calendar-task-card .calendar-task-content small {
+  word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: normal;
 }
 
@@ -845,6 +875,23 @@ body.dark-mode .calendar-task-card:hover {
   align-items: flex-start;
   gap: 12px;
   padding: 10px 0;
+}
+
+/* MyChores: ensure text area can shrink and wrap without forcing horizontal scroll
+   The structure is: .card > div:first-child (flex row) > div (text container)
+   We need the inner text container to be allowed to shrink (min-width:0) and wrap words. */
+.card > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0; /* allow shrinking */
+}
+
+.card > div:first-child > div {
+  min-width: 0; /* allow text to wrap instead of expanding */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .card > div:first-child {
@@ -870,6 +917,28 @@ body.dark-mode .calendar-task-card:hover {
   display: flex;
   gap: 8px;
   align-items: flex-start;
+}
+
+/* Ensure action icons don't grow and stay aligned; make them touch-friendly */
+.task-action-icon {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+/* Done button in tasks (left) */
+.done-button {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  flex: 0 0 auto;
 }
 
 body.dark-mode .calendar-task-card strong {

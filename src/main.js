@@ -6,6 +6,18 @@ import { getTasks, addTask, updateTask, deleteTask } from './supabaseClient.js';
 
 const app = document.getElementById("app");
 
+// --- Simple frontend rate-limit helper ---
+// Disables a button for `ms` milliseconds to prevent rapid duplicate requests.
+function disableButtonTemporarily(btn, ms = 1500) {
+  try {
+    if (!btn) return;
+    btn.disabled = true;
+    setTimeout(() => {
+      try { btn.disabled = false; } catch (e) {}
+    }, ms);
+  } catch (e) {}
+}
+
 // --- Funkce pro načtení stránky ---
 function loadPage(page) {
   let pageContent = "";
@@ -361,6 +373,9 @@ function setupTaskListeners() {
 
   // --- Uložení tasku ---
   saveBtn.addEventListener("click", async () => {
+    if (saveBtn.disabled) return; // simple throttle
+    disableButtonTemporarily(saveBtn, 1500);
+
     const name = nameInput.value.trim();
     const description = descInput.value.trim();
     const date = dateInput.value;
@@ -621,6 +636,9 @@ function setupCalendarTaskModal() {
 
   // Save task
   saveBtn.addEventListener("click", async () => {
+    if (saveBtn.disabled) return; // simple throttle
+    disableButtonTemporarily(saveBtn, 1500);
+
     const name = nameInput.value.trim();
     const description = descInput.value.trim();
     const date = dateInput.value;
@@ -740,6 +758,13 @@ async function updateCalendarTaskPreview() {
 
   const tasks = await getTasks();
   const tasksForDate = tasks.filter((t) => t.date === dateStr);
+
+  // Sort tasks alphabetically by name (A-Z) for Calendar preview
+  tasksForDate.sort((a, b) => {
+    const na = (a.name || '').toString();
+    const nb = (b.name || '').toString();
+    return na.localeCompare(nb, undefined, { sensitivity: 'base' });
+  });
 
   const taskPreviewList = document.getElementById("taskPreviewList");
   if (taskPreviewList) {
