@@ -660,7 +660,7 @@ async function setupCalendarTaskActions() {
   // Edit Calendar Tasks
   document.querySelectorAll(".calendar-task-edit").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const taskId = btn.dataset.taskId; // Keep as string (UUID)
+      const taskId = btn.dataset.id; // Keep as string (UUID)
       if (!taskId) return;
       try {
         const tasks = await getTasks();
@@ -675,13 +675,30 @@ async function setupCalendarTaskActions() {
   // Delete Calendar Tasks
   document.querySelectorAll(".calendar-task-delete").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const taskId = btn.dataset.taskId; // Keep as string (UUID)
+      const taskId = btn.dataset.id; // Keep as string (UUID)
       if (!taskId) return;
       try {
         await deleteTask(taskId);
         await updateCalendarTaskPreview();
       } catch (err) {
         console.error('Error deleting task', err);
+      }
+    });
+  });
+
+  // Done Calendar Tasks
+  document.querySelectorAll(".calendar-task-done").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const taskId = btn.dataset.id;
+      if (!taskId) return;
+      try {
+        const tasks = await getTasks();
+        const task = tasks.find((t) => t.id === taskId);
+        if (!task) return;
+        await updateTask(taskId, { done: !task.done });
+        await updateCalendarTaskPreview();
+      } catch (err) {
+        console.error('Error toggling done for calendar task', err);
       }
     });
   });
@@ -732,13 +749,14 @@ async function updateCalendarTaskPreview() {
       taskPreviewList.innerHTML = tasksForDate
         .map((t) => `
           <div class="calendar-task-card" style="border-left-color: ${t.priority === 'high' ? '#dc3545' : t.priority === 'low' ? '#28a745' : '#007bff'};">
+            <button class="task-action-icon calendar-task-done" data-id="${t.id}" title="Mark done">${t.done ? '✅' : '✔️'}</button>
             <div class="calendar-task-content">
               <strong>${t.name}</strong>
               ${t.description ? `<small>${t.description}</small>` : ''}
             </div>
             <div class="task-actions">
-              <button class="task-action-icon calendar-task-edit" data-task-id="${t.id}" title="Edit task">✏️</button>
-              <button class="task-action-icon calendar-task-delete" data-task-id="${t.id}" title="Delete task">🗑️</button>
+              <button class="task-action-icon calendar-task-edit" data-id="${t.id}" title="Edit task">✏️</button>
+              <button class="task-action-icon calendar-task-delete" data-id="${t.id}" title="Delete task">🗑️</button>
             </div>
           </div>
         `)
@@ -852,17 +870,16 @@ async function renderTasks() {
 
   // Build task cards HTML
   const renderTaskCard = (t) => `
-    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <input type="checkbox" data-id="${t.id}" ${t.done ? "checked" : ""}/>
+    <div class="card">
+      <div style="display:flex; align-items:flex-start; gap:8px;">
+        <button class="task-action-icon done-button" data-action="done" data-id="${t.id}" title="Mark done">${t.done ? '✅' : '✔️'}</button>
         <div>
           <strong style="${t.done ? "text-decoration: line-through; color:green" : ""}">${t.name}</strong>
-          <br/>
-          <small>Description: ${t.description}</small><br/>
+          <small>Description: ${t.description}</small>
           <small>Priority: ${t.priority}</small>
         </div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div class="task-actions">
         <button class="task-action-icon" data-action="edit" data-id="${t.id}" title="Edit task">✏️</button>
         <button class="task-action-icon" data-action="delete" data-id="${t.id}" title="Delete task">🗑️</button>
       </div>
@@ -939,19 +956,7 @@ async function renderTasks() {
     });
   });
 
-  // --- Checkbox listener ---
-  document.querySelectorAll("#taskList input[type=checkbox]").forEach((checkbox) => {
-    checkbox.addEventListener("change", async (e) => {
-      const id = e.target.dataset.id; // Keep as string (UUID)
-      if (!id) return;
-      try {
-        await updateTask(id, { done: e.target.checked });
-        await renderTasks();
-      } catch (err) {
-        console.error('Error updating task done flag', err);
-      }
-    });
-  });
+  // --- Done button listeners are handled below with other buttons ---
 
   // --- Edit / Delete ---
   document.querySelectorAll("#taskList button").forEach((btn) => {
@@ -977,6 +982,20 @@ async function renderTasks() {
           await renderTasks();
         } catch (err) {
           console.error('Error deleting task', err);
+        }
+      });
+    }
+
+    if (btn.dataset.action === "done") {
+      btn.addEventListener("click", async () => {
+        try {
+          const tasksNow = await getTasks();
+          const task = tasksNow.find((t) => t.id === id);
+          if (!task) return;
+          await updateTask(id, { done: !task.done });
+          await renderTasks();
+        } catch (err) {
+          console.error('Error toggling done', err);
         }
       });
     }

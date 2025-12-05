@@ -1221,6 +1221,18 @@ body.dark-mode .settings-info p {
   opacity: 0.7;
 }
 
+/* Done button styling (green) */
+.task-action-icon.done-button,
+.calendar-task-done {
+  color: #1b7a3a;
+}
+
+.task-action-icon.done-button:hover,
+.calendar-task-done:hover {
+  background: rgba(27, 122, 58, 0.08);
+  opacity: 1;
+}
+
 .task-action-icon:hover {
   opacity: 1;
   background: rgba(0, 123, 255, 0.1);
