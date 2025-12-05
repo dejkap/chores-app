@@ -759,8 +759,19 @@ async function updateCalendarTaskPreview() {
   const tasks = await getTasks();
   const tasksForDate = tasks.filter((t) => t.date === dateStr);
 
-  // Sort tasks alphabetically by name (A-Z) for Calendar preview
-  tasksForDate.sort((a, b) => {
+  // Normalize task dates and sort alphabetically by name (A-Z) for Calendar preview
+  const normalized = (tasks || []).map((t) => {
+    let norm = t.date;
+    try {
+      const d = new Date(t.date);
+      if (!isNaN(d)) norm = d.toISOString().split('T')[0];
+    } catch (e) {}
+    return { ...t, _normDate: norm };
+  });
+
+  const tasksForDateNorm = normalized.filter((t) => t._normDate === dateStr);
+
+  tasksForDateNorm.sort((a, b) => {
     const na = (a.name || '').toString();
     const nb = (b.name || '').toString();
     return na.localeCompare(nb, undefined, { sensitivity: 'base' });
@@ -768,10 +779,10 @@ async function updateCalendarTaskPreview() {
 
   const taskPreviewList = document.getElementById("taskPreviewList");
   if (taskPreviewList) {
-    if (tasksForDate.length === 0) {
+    if (tasksForDateNorm.length === 0) {
       taskPreviewList.innerHTML = `<p style="color: #999; font-size: 14px;">No tasks for this date</p>`;
     } else {
-      taskPreviewList.innerHTML = tasksForDate
+      taskPreviewList.innerHTML = tasksForDateNorm
         .map((t) => `
           <div class="calendar-task-card" style="border-left-color: ${t.priority === 'high' ? '#dc3545' : t.priority === 'low' ? '#28a745' : '#007bff'};">
             <button class="task-action-icon calendar-task-done" data-id="${t.id}" title="Mark done">${t.done ? '✅' : '✔️'}</button>
@@ -873,8 +884,26 @@ async function renderTasks() {
   const currentDate = storedDate ? new Date(storedDate) : new Date();
   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
-  // Filter tasks for the current date only
-  const filteredTasks = tasks.filter((t) => t.date === dateStr);
+  // Normalize task dates (handle full ISO datetimes or date-only strings)
+  let filteredTasks = [];
+  try {
+    const normalized = (tasks || []).map((t) => {
+      let norm = t.date;
+      try {
+        const d = new Date(t.date);
+        if (!isNaN(d)) norm = d.toISOString().split('T')[0];
+      } catch (e) {
+        // leave as-is
+      }
+      return { ...t, _normDate: norm };
+    });
+
+    filteredTasks = normalized.filter((t) => t._normDate === dateStr);
+  } catch (err) {
+    console.error('Error normalizing task dates', err);
+    // fallback: try simple equality filter
+    filteredTasks = (tasks || []).filter((t) => t.date === dateStr);
+  }
 
   if (!filteredTasks.length) {
     taskListContainer.innerHTML = `<p>No tasks for this date. Add some!</p>`;
