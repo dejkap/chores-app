@@ -889,13 +889,15 @@ function setupMyChoresDateNavigation() {
   const dayPicker = document.getElementById("dayPicker");
   const dateDisplayText = document.getElementById("dateDisplayText");
 
-  // Initialize currentDate from storage if present, otherwise use today
-  const stored = localStorage.getItem("myChoresCurrentDate");
+  // Initialize currentDate from sessionStorage (set by MyChores.js on first load)
+  // If sessionStorage doesn't have it, MyChores.js should have already set it
+  const stored = sessionStorage.getItem("selectedDate");
   let currentDate = stored ? new Date(stored + "T00:00:00") : new Date();
 
   const updateDisplay = () => {
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
-    localStorage.setItem("myChoresCurrentDate", dateStr);
+    // Save to sessionStorage so navigation state persists during the session
+    sessionStorage.setItem("selectedDate", dateStr);
     if (dayPicker) dayPicker.value = dateStr;
     if (dateDisplayText) dateDisplayText.textContent = currentDate.toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
     renderTasks();
@@ -903,7 +905,7 @@ function setupMyChoresDateNavigation() {
 
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
-      // compute new date from current state rather than mutating unpredictable value
+      // compute new date from current state and save to sessionStorage
       currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1);
       updateDisplay();
     });
@@ -918,7 +920,7 @@ function setupMyChoresDateNavigation() {
 
   if (dayPicker) {
     dayPicker.addEventListener("change", (e) => {
-      // parse yyyy-mm-dd from input reliably as local date
+      // parse yyyy-mm-dd from input reliably as local date and save to sessionStorage
       currentDate = new Date(e.target.value + "T00:00:00");
       updateDisplay();
     });
@@ -964,8 +966,10 @@ async function renderTasks() {
 
   const tasks = await getTasks();
 
-  // Get current date for filtering
-  const storedDate = localStorage.getItem("myChoresCurrentDate");
+  // Get current date for filtering: read from sessionStorage if set (by date navigation),
+  // otherwise use today's date. sessionStorage is set by MyChores.js on init and
+  // setupMyChoresDateNavigation on navigation.
+  const storedDate = sessionStorage.getItem("selectedDate");
   const currentDate = storedDate ? new Date(storedDate + "T00:00:00") : new Date();
   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 

@@ -1,7 +1,22 @@
 export function MyChores() {
-  const today = new Date();
+  // Check if date exists in sessionStorage; if not, initialize with today
+  let storedDate = sessionStorage.getItem('selectedDate');
+  let today;
+  
+  if (storedDate) {
+    // Parse the stored YYYY-MM-DD date as local date
+    today = new Date(storedDate + "T00:00:00");
+  } else {
+    // First time in session: use today and store it
+    today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    sessionStorage.setItem('selectedDate', todayStr);
+  }
+  
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   
+  console.log("App initialized with date:", todayStr);
+
   return `
     <div id="taskListWrapper" style="height:100%; display:flex; flex-direction:column;">
       <div id="headerWrapper">
