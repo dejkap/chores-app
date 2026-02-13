@@ -6,6 +6,120 @@ import { getTasks, addTask, updateTask, deleteTask } from './supabaseClient.js';
 
 const app = document.getElementById("app");
 
+// ========== PANEL COLLAPSE/EXPAND FUNCTIONALITY ==========
+function setupPanelControls() {
+  const leftPanel = document.getElementById('left-panel');
+  const rightPanel = document.getElementById('qa-panel');
+  const mainWrapper = document.getElementById('mainWrapper');
+  const collapseLeftBtn = document.getElementById('collapseLeftBtn');
+  const collapseRightBtn = document.getElementById('collapseRightBtn');
+  const leftHeader = document.getElementById('leftPanelHeader');
+  const rightHeader = document.getElementById('rightPanelHeader');
+
+  // track collapsed state
+  let leftCollapsed = false;
+  let rightCollapsed = false;
+  const leftTab = document.getElementById('leftTab');
+  const rightTab = document.getElementById('rightTab');
+
+  function applyGrid() {
+    // control widths: when collapsed we set panel width 0 and show tab; when open set open width
+    if (leftPanel) leftPanel.style.width = leftCollapsed ? '0px' : '380px';
+    if (rightPanel) rightPanel.style.width = rightCollapsed ? '0px' : '380px';
+    // tabs visibility
+    if (leftTab) leftTab.style.display = leftCollapsed ? 'flex' : 'none';
+    if (rightTab) rightTab.style.display = rightCollapsed ? 'flex' : 'none';
+  }
+
+  function toggleLeft() {
+    leftCollapsed = !leftCollapsed;
+    if (leftPanel) leftPanel.classList.toggle('collapsed', leftCollapsed);
+    const icon = collapseLeftBtn?.querySelector('.collapse-icon');
+    // Left panel: open=‹ (points left/outward), closed => › (points right/inward)
+    if (icon) icon.textContent = leftCollapsed ? '›' : '‹';
+    // update left tab label arrow
+    if (leftTab) leftTab.innerHTML = leftCollapsed ? 'Documentation &nbsp; ›' : '';
+    applyGrid();
+  }
+
+  function toggleRight() {
+    rightCollapsed = !rightCollapsed;
+    if (rightPanel) rightPanel.classList.toggle('collapsed', rightCollapsed);
+    const icon = collapseRightBtn?.querySelector('.collapse-icon');
+    // Right panel: open=› (points right/outward), closed => ‹ (points left/inward)
+    if (icon) icon.textContent = rightCollapsed ? '‹' : '›';
+    if (rightTab) rightTab.innerHTML = rightCollapsed ? '&nbsp; ‹ &nbsp; QA Lab' : '';
+    applyGrid();
+  }
+
+  if (collapseLeftBtn) collapseLeftBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleLeft(); });
+  if (collapseRightBtn) collapseRightBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleRight(); });
+  // tabs click open panels
+  if (leftTab) leftTab.addEventListener('click', (e) => { e.stopPropagation(); if (leftCollapsed) toggleLeft(); });
+  if (rightTab) rightTab.addEventListener('click', (e) => { e.stopPropagation(); if (rightCollapsed) toggleRight(); });
+
+  // clicking header toggles as well
+  if (leftHeader) leftHeader.addEventListener('click', (e) => { if (!e.target.classList.contains('collapse-btn')) toggleLeft(); });
+  if (rightHeader) rightHeader.addEventListener('click', (e) => { if (!e.target.classList.contains('collapse-btn')) toggleRight(); });
+
+  // initialize grid
+  applyGrid();
+}
+
+// ========== DARK MODE TOGGLE ==========
+function setupDarkMode() {
+  const darkModeBtn = document.getElementById('globalDarkModeBtn') || document.getElementById('darkModeBtn');
+  const htmlElement = document.documentElement;
+
+  // Check localStorage for saved preference
+  const isDarkMode = localStorage.getItem('darkMode') === 'true';
+  if (isDarkMode) {
+    document.body.classList.add('dark-mode');
+  }
+
+  if (darkModeBtn) {
+    darkModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const newDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', newDarkMode);
+    });
+  }
+}
+
+// ========== QA LAB TOGGLE & SCROLL ==========
+function setupQALabControls() {
+  const qaPanel = document.getElementById('qa-panel');
+  const qaCards = document.getElementById('qaCards');
+  // If there is a legacy tcBugBtn, make it open/scroll to QA panel
+  const tcBugBtn = document.getElementById('tcBugBtn');
+  if (tcBugBtn && qaPanel) {
+    tcBugBtn.addEventListener('click', () => {
+      // Ensure QA panel is expanded
+      const collapseRightBtn = document.getElementById('collapseRightBtn');
+      if (collapseRightBtn) collapseRightBtn.click();
+      qaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // Collapsible ticket logic (event delegation): handle tc-card and bug-card via single listener
+  if (qaPanel) {
+    // initialize toggle glyphs
+    qaPanel.querySelectorAll('.tc-toggle, .bug-card .tc-toggle').forEach(t => t.textContent = '▸');
+
+    qaPanel.addEventListener('click', (e) => {
+      const header = e.target.closest('.tc-header, .bug-header');
+      if (!header) return;
+      // prevent toggling when clicking the collapse button in header
+      if (e.target.closest && e.target.closest('.collapse-btn')) return;
+      const card = header.closest('.tc-card, .bug-card');
+      if (!card) return;
+      card.classList.toggle('open');
+      const toggle = header.querySelector('.tc-toggle');
+      if (toggle) toggle.textContent = card.classList.contains('open') ? '▾' : '▸';
+    });
+  }
+}
+
 // --- Funkce pro načtení stránky ---
 function loadPage(page) {
   let pageContent = "";
@@ -775,36 +889,43 @@ function setupMyChoresDateNavigation() {
   const dayPicker = document.getElementById("dayPicker");
   const dateDisplayText = document.getElementById("dateDisplayText");
 
-  let currentDate = new Date(localStorage.getItem("myChoresCurrentDate") || new Date());
+  // Initialize currentDate from storage if present, otherwise use today
+  const stored = localStorage.getItem("myChoresCurrentDate");
+  let currentDate = stored ? new Date(stored + "T00:00:00") : new Date();
 
   const updateDisplay = () => {
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
     localStorage.setItem("myChoresCurrentDate", dateStr);
-    dayPicker.value = dateStr;
-    dateDisplayText.textContent = currentDate.toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+    if (dayPicker) dayPicker.value = dateStr;
+    if (dateDisplayText) dateDisplayText.textContent = currentDate.toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
     renderTasks();
   };
 
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
-      currentDate.setDate(currentDate.getDate() - 1);
+      // compute new date from current state rather than mutating unpredictable value
+      currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1);
       updateDisplay();
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener("click", () => {
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
       updateDisplay();
     });
   }
 
   if (dayPicker) {
     dayPicker.addEventListener("change", (e) => {
-      currentDate = new Date(e.target.value);
+      // parse yyyy-mm-dd from input reliably as local date
+      currentDate = new Date(e.target.value + "T00:00:00");
       updateDisplay();
     });
   }
+
+  // ensure display is initialized on setup
+  updateDisplay();
 }
 
 // --- Get sort order (from localStorage or default) ---
@@ -845,7 +966,7 @@ async function renderTasks() {
 
   // Get current date for filtering
   const storedDate = localStorage.getItem("myChoresCurrentDate");
-  const currentDate = storedDate ? new Date(storedDate) : new Date();
+  const currentDate = storedDate ? new Date(storedDate + "T00:00:00") : new Date();
   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
 
   // Filter tasks for the current date only
@@ -1125,31 +1246,12 @@ function setupEditModalListeners() {
   });
 }
 
-// --- Inicializace ---
+// Set the current date on app load
+const today = new Date();
+const sharedState = { selectedDate: today };
+
+// Initialize the application
+setupPanelControls();
+setupDarkMode();
+setupQALabControls();
 loadPage("chores");
-
-// --- Dark Mode Toggle ---
-const darkModeBtn = document.getElementById("darkModeBtn");
-darkModeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-});
-
-// --- TC/Bug Modal ---
-const tcBugBtn = document.getElementById("tcBugBtn");
-const tcBugModal = document.getElementById("tcBugModal");
-const closeTcBugBtn = document.getElementById("closeTcBugBtn");
-
-tcBugBtn.addEventListener("click", () => {
-  tcBugModal.classList.toggle("hidden");
-});
-
-closeTcBugBtn.addEventListener("click", () => {
-  tcBugModal.classList.add("hidden");
-});
-
-// Close TC/Bug modal when clicking outside (optional)
-tcBugModal.addEventListener("click", (e) => {
-  if (e.target === tcBugModal) {
-    tcBugModal.classList.add("hidden");
-  }
-});

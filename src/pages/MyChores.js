@@ -3,7 +3,7 @@ export function MyChores() {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   
   return `
-    <div id="taskListWrapper">
+    <div id="taskListWrapper" style="height:100%; display:flex; flex-direction:column;">
       <div id="headerWrapper">
         <h1 class="page-title">My Chores</h1>
         
@@ -18,7 +18,7 @@ export function MyChores() {
         
         <button id="addTaskBtn" class="btn-primary">Add Task</button>
       </div>
-      <div id="taskList"></div>
+      <div id="taskList" style="overflow-y:auto; flex:1 1 auto;"></div>
     </div>
   `;
 }

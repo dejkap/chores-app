@@ -1,95 +1,356 @@
 /* ================= Reset & base styles ================= */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+:root {
+  --color-bg-light: #ffffff;
+  --color-bg-light-secondary: #f9f9f9;
+  --color-text-dark: #333333;
+  --color-text-light: #e0e0e0;
+  --color-text-muted: #666666;
+  --color-border: #ddd;
+  --color-shadow: rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode {
-  background: #1a1a1a;
-  color: #e0e0e0;
+  --color-bg-light: #1a1a1a;
+  --color-bg-light-secondary: #2d2d2d;
+  --color-text-dark: #e0e0e0;
+  --color-text-light: #0a0a0a;
+  --color-text-muted: #999999;
+  --color-border: #333;
+  --color-shadow: rgba(0, 0, 0, 0.3);
 }
 
-body.dark-mode #app {
-  background: #2d2d2d;
-  border-color: #444;
+* {
+  box-sizing: border-box;
 }
 
-body.dark-mode #headerWrapper,
-body.dark-mode nav {
-  background: #2d2d2d;
-  border-color: #444;
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden; /* page static, internal scrolls only */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: var(--color-bg-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  color: var(--color-text-dark);
 }
 
-body.dark-mode .modal-content {
-  background: #2d2d2d;
-  color: #e0e0e0;
+body.dark-mode {
+  background: var(--color-bg-light);
+  color: var(--color-text-dark);
 }
 
-body.dark-mode .modal-content input,
-body.dark-mode .modal-content textarea {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
+/* ================= MAIN WRAPPER - 3 Column Layout ================= */
+#mainWrapper {
+  /* central layout variables */
+  --app-width: 410px;
+  --app-height: 850px;
+  --panel-open: 380px;
+  --panel-collapsed: 40px;
+  --panel-gap: 24px;
+
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
-body.dark-mode .card {
-  background: #3a3a3a;
-  border-color: #555;
-  color: #e0e0e0;
-}
-
-body.dark-mode .section-header {
-  border-color: #555;
-  color: #e0e0e0;
-}
-
-body.dark-mode nav button {
-  color: #999;
-}
-
-body.dark-mode nav button.active {
-  color: #007bff;
-}
-
-body.dark-mode .tc-bug-content {
-  background: #2d2d2d;
-  color: #e0e0e0;
-}
-
-body.dark-mode .tc-bug-header {
-  border-bottom-color: #555;
-}
-
-/* ================= Mobilní okno aplikace ================= */
-#app {
-  width: 420px;
-  height: 780px;
-  background: white;
-  border-radius: 30px;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 40px rgba(0,0,0,0.2);
-
+/* ================= Side Panels - Left & Right ================= */
+.side-panel {
+  background: var(--color-bg-light);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* scroll jen v taskList */
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  height: var(--app-height);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  z-index: 2000;
+}
+
+.panel-header {
+  padding: 12px 14px;
+  background: var(--color-bg-light-secondary);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.panel-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease;
+}
+
+.collapse-btn:hover {
+  color: var(--color-text-dark);
+}
+
+body.dark-mode .collapse-btn {
+  color: var(--color-text-muted);
+}
+
+body.dark-mode .collapse-btn:hover {
+  color: var(--color-text-dark);
+}
+
+.collapse-icon {
+  display: inline-block;
+  font-weight: bold;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.2);
+}
+
+.panel-content {
+  padding: 15px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.panel-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+  background: var(--color-bg-light-secondary);
+  border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dark);
+}
+
+/* ================= Documentation Section ================= */
+.documentation-section,
+.qa-section {
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.documentation-section:last-child,
+.qa-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.panel-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #007bff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+body.dark-mode .panel-content h3 {
+  color: #4da6ff;
+}
+
+.panel-content p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.panel-content ul {
+  margin: 5px 0;
+  padding-left: 18px;
+}
+
+.panel-content li {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 4px 0;
+}
+
+/* ================= Buttons in Panels ================= */
+.qa-btn {
+  width: 100%;
+  padding: 8px 12px;
+  margin: 5px 0;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  background: var(--color-bg-light);
+  color: #007bff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qa-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+body.dark-mode .qa-btn {
+  background: var(--color-bg-light);
+  border-color: #4da6ff;
+  color: #4da6ff;
+}
+
+body.dark-mode .qa-btn:hover {
+  background: #4da6ff;
+  color: var(--color-bg-light);
+}
+
+.qa-content {
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--color-bg-light-secondary);
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+body.dark-mode .qa-content {
+  background: var(--color-bg-light-secondary);
+  border-left-color: #4da6ff;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.qa-content.hidden {
+  display: none;
+}
+
+.bugs-list {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ================= Floating Back to CV Button ================= */
+/* Top controls container (CV + Dark Mode) */
+#topControls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  display: flex;
+  gap: 8px;
+}
+
+.top-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  font-weight:600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.top-btn:hover { background: #0056b3 }
+
+.floating-btn:hover {
+  background: #0056b3;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+.back-cv-btn {
+  top: 20px;
+  left: 20px;
+}
+
+body.dark-mode .floating-btn {
+  background: #4da6ff;
+  color: var(--color-text-light);
+}
+
+body.dark-mode .floating-btn:hover {
+  background: #2d8fff;
+}
+
+/* ================= Mobile Application (Center Column) ================= */
+.main-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+#middle-panel { display:flex; align-items:center; justify-content:center; }
+
+#app {
+  width: 410px;
+  height: 850px;
+  background: var(--color-bg-light);
+  border-radius: 30px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: relative;
 }
 
 /* ================= Horní blok: titulek + Add Task ================= */
 #headerWrapper {
-  padding: 20px;
-  flex-shrink: 0; /* nenechat zmenšit */
-  background: white;
+  padding: 16px;
+  flex: 0 0 auto;
+  background: var(--color-bg-light);
   z-index: 20;
-  /* header will remain visually fixed because only the list scrolls */
-  position: relative;
+  position: sticky;
+  top: 0;
   box-shadow: 0 1px 0 rgba(0,0,0,0.04);
 }
 
@@ -97,7 +358,328 @@ body.dark-mode .tc-bug-header {
   margin: 0;
   font-size: 22px;
   font-weight: bold;
+  color: var(--color-text-dark);
 }
+
+/* Sticky footer nav inside app */
+#app nav {
+  position: sticky;
+  bottom: 0;
+  background: transparent;
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-around;
+  border-top: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.95);
+}
+
+#app nav button {
+  white-space: nowrap;
+  font-size: 13px;
+  padding: 8px 10px;
+  min-width: auto;
+  flex: 1 1 auto;
+  max-width: 100px;
+  background: none;
+  border: none;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#app nav button.active {
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+}
+
+body.dark-mode #app nav button.active {
+  border-bottom-color: #4da6ff;
+}
+
+body.dark-mode #app nav { background: rgba(45,45,45,0.95); border-top-color: var(--color-border); }
+
+#addTaskBtn { width:100%; background:#007bff; color:white; border:none; padding:10px; font-size:15px; border-radius:6px; cursor:pointer; margin-top:10px }
+
+/* Make sure app content area scrolls internally */
+#app #content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#app #content > div {
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+#app #content .page-body {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Center the app absolutely in the viewport */
+#middle-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--app-width);
+  height: var(--app-height);
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#middle-panel { z-index: 1000; }
+
+#middle-panel #app {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+}
+
+/* Position left and right panels relative to center app */
+#left-panel {
+  left: calc(50% - (var(--app-width) / 2) - var(--panel-gap) - var(--panel-open));
+  width: var(--panel-open);
+  border-radius: 0 12px 12px 0;
+}
+
+#qa-panel {
+  left: calc(50% + (var(--app-width) / 2) + var(--panel-gap));
+  width: var(--panel-open);
+  border-radius: 12px 0 0 12px;
+}
+
+body.dark-mode #addTaskBtn {
+  background: #4da6ff;
+  color: var(--color-text-light);
+}
+
+/* ================= Collapsible Panels Animation ================= */
+
+/* Collapsed panels become invisible containers (width 0); only the floating tab shows */
+#left-panel.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: visible; /* allow tab to show outside */
+  left: calc(50% - (var(--app-width) / 2) - var(--panel-gap)) !important;
+}
+
+#qa-panel.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: visible;
+  left: calc(50% + (var(--app-width) / 2) + var(--panel-gap)) !important;
+}
+
+.side-panel.collapsed { width: 0 !important; min-width: 0 !important; pointer-events: none; border: none; box-shadow: none; outline: none; background: transparent; }
+
+/* When collapsed, hide internal content; header remains visually hidden (tab used instead) */
+#left-panel.collapsed .panel-content, #qa-panel.collapsed .panel-content { display: none; }
+
+#left-panel.collapsed .panel-header, #qa-panel.collapsed .panel-header { display: none; }
+
+/* Floating tabs - modern pill-shaped design */
+.panel-tab {
+  position: absolute;
+  top: calc(50% - (var(--app-height) / 2)); /* align with top of app */
+  width: 40px;
+  height: 120px;
+  display: none; /* shown only when collapsed via JS */
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+  z-index: 6000;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  padding: 6px;
+  font-size: 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.panel-tab:hover {
+  background: var(--color-bg-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .panel-tab {
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+}
+
+body.dark-mode .panel-tab:hover {
+  background: var(--color-bg-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.panel-tab { pointer-events: auto; }
+
+.panel-tab.left-tab {
+  left: calc(50% - (var(--app-width) / 2) - 40px - 8px);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: scaleX(-1);
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.panel-tab.right-tab {
+  left: calc(50% + (var(--app-width) / 2) + 8px);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: flex;
+  flex-direction: column;
+}
+
+/* QA card sizing and metadata */
+.qa-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tc-card, .bug-card {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 1px 6px var(--color-shadow);
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 0;
+}
+body.dark-mode .tc-meta { color: var(--color-text-muted); }
+.tc-reporter { color: var(--color-text-muted); }
+body.dark-mode .tc-reporter { color: var(--color-text-light); }
+.tc-priority { padding: 2px 6px; border-radius: 6px; font-weight:700; font-size:12px; }
+.priority-high { background: #ffdddd; color:#a00; }
+body.dark-mode .priority-high { background: #4a0000; color:#ff9999; }
+.priority-medium { background: #fff4cc; color:#b36b00; }
+body.dark-mode .priority-medium { background: #4a3400; color:#ffcc99; }
+.priority-critical { background: #ffd1d1; color:#7a0000; }
+body.dark-mode .priority-critical { background: #5a0000; color:#ff8888; }
+.tc-component { font-style: italic; color: var(--color-text-muted); }
+body.dark-mode .tc-component { color: var(--color-text-muted); }
+.collapsible .tc-body, .collapsible .bug-body { display: none; }
+.collapsible.open .tc-body, .collapsible.open .bug-body { display: block; }
+.tc-toggle { cursor: pointer; margin-left: 8px; font-weight: bold; }
+body.dark-mode .tc-card, body.dark-mode .bug-card { background: var(--color-bg-light); border-color: var(--color-border); }
+body.dark-mode .tc-id, body.dark-mode .bug-id { color: var(--color-text-dark); }
+body.dark-mode .tc-title { color: var(--color-text-dark); }
+body.dark-mode .tc-desc, body.dark-mode .tc-steps, body.dark-mode .tc-result { color: var(--color-text-muted); }
+body.dark-mode .bug-body { color: var(--color-text-muted); }
+
+/* ================= Responsive Design ================= */
+@media (max-width: 1200px) {
+  /* collapse to single column on smaller screens */
+  #left-panel, #qa-panel { display: none; }
+  #middle-panel { position: static; transform: none; left: auto; top: auto; }
+  #app { width: 100%; height: auto; max-width: 100%; }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  #mainWrapper {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .side-panel {
+    display: none;
+  }
+
+  #app {
+    width: 420px;
+    height: 780px;
+    max-width: none;
+    border-radius: 30px;
+    margin: 50px auto 0;
+  }
+
+  .floating-btn {
+    top: 10px;
+    left: 10px;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+}
+
+/* ================= QA Cards & Bug Card Styles ================= */
+.qa-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tc-card, .bug-card {
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.tc-header, .bug-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.tc-id { font-weight:700; color: var(--color-text-dark); }
+.tc-title { font-weight:600; margin-bottom:6px; }
+.tc-desc, .tc-steps, .tc-result { font-size:13px; color: var(--color-text-muted); margin-bottom:6px; }
+.tc-status.status-passed { color: #0a7a2a; font-weight:700; }
+.bug-status.status-open { color: #b30000; font-weight:700; }
+.bug-severity { font-size:12px; color: var(--color-text-muted); }
+
+/* ================= Image Placeholder ================= */
+.image-placeholder {
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin: 10px 0;
+  background: var(--color-bg-light-secondary);
+}
+.image-icon { font-size:22px; }
+.image-label { font-size:13px; color: var(--color-text-muted); }
+
+/* Collapsible ticket details */
+.tc-card .tc-body, .bug-card .bug-body { display:none; }
+.tc-card.open .tc-body, .bug-card.open .bug-body { display:block; }
+.tc-card .tc-header, .bug-card .bug-header { cursor:pointer; }
+
+/* Ensure details use proper background and text in both modes */
+.tc-card .tc-body, .bug-card .bug-body {
+  background: transparent;
+  color: var(--color-text-muted);
+  padding-top: 6px;
+}
+
+body.dark-mode .tc-card .tc-body, body.dark-mode .bug-card .bug-body {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+/* Task title wrap fix inside app */
+.task-title, .task-name { word-break: break-all; }
+
+/* Left panel should scroll independently */
+#left-panel .panel-content { overflow-y: auto; }
+
 
 #addTaskBtn {
   width: 100%;
@@ -129,9 +711,9 @@ body.dark-mode .tc-bug-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
@@ -141,19 +723,19 @@ body.dark-mode .tc-bug-header {
 }
 
 .daily-nav-arrow:hover {
-  background: #e0e0e0;
-  border-color: #999;
+  background: var(--color-bg-light);
+  border-color: var(--color-text-muted);
 }
 
 body.dark-mode .daily-nav-arrow {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
 }
 
 body.dark-mode .daily-nav-arrow:hover {
-  background: #444;
-  border-color: #666;
+  background: var(--color-bg-light);
+  border-color: var(--color-text-muted);
 }
 
 .daily-nav-date {
@@ -162,20 +744,20 @@ body.dark-mode .daily-nav-arrow:hover {
   align-items: center;
   justify-content: center;
   padding: 8px 12px;
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background: var(--color-bg-light-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   text-align: center;
   font-size: 14px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text-dark);
   position: relative;
 }
 
 body.dark-mode .daily-nav-date {
-  background: #3a3a3a;
-  border-color: #555;
+  background: var(--color-bg-light-secondary);
+  border-color: var(--color-border);
   color: #e0e0e0;
 }
 
@@ -232,9 +814,9 @@ body.dark-mode .calendar-arrow:hover {
 .calendar-header-selector {
   min-width: 70px;
   padding: 8px 12px;
-  background: white;
-  color: #333;
-  border: 1px solid #ddd;
+  background: var(--color-bg-light);
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
@@ -243,18 +825,18 @@ body.dark-mode .calendar-arrow:hover {
 }
 
 .calendar-header-selector:hover {
-  background: #f0f0f0;
+  background: var(--color-bg-light-secondary);
   border-color: #007bff;
 }
 
 body.dark-mode .calendar-header-selector {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
 }
 
 body.dark-mode .calendar-header-selector:hover {
-  background: #444;
+  background: var(--color-bg-light);
   border-color: #007bff;
 }
 
@@ -299,13 +881,9 @@ body.dark-mode .btn-primary:hover {
 .selector-column h3 {
   margin: 0 0 10px 0;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-dark);
   font-weight: bold;
   text-align: center;
-}
-
-body.dark-mode .selector-column h3 {
-  color: #e0e0e0;
 }
 
 .selector-list {
@@ -318,12 +896,12 @@ body.dark-mode .selector-column h3 {
 
 .selector-list button {
   padding: 8px;
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background: var(--color-bg-light-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-dark);
   transition: all 0.2s ease;
 }
 
@@ -340,19 +918,14 @@ body.dark-mode .selector-column h3 {
 }
 
 body.dark-mode .selector-list button {
-  background: #3a3a3a;
-  border-color: #555;
-  color: #e0e0e0;
+  background: var(--color-bg-light-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-dark);
 }
 
 body.dark-mode .selector-list button:hover {
-  background: #444;
+  background: var(--color-bg-light);
   border-color: #007bff;
-}
-
-body.dark-mode .selector-list button.active {
-  background: #007bff;
-  color: white;
 }
 
 /* ================= Seznam tasků – scrollovatelný ================= */
@@ -436,10 +1009,22 @@ nav button.active span {
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
+  color: #333;
+}
+
+body.dark-mode .card {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
 }
 
 .center {
   text-align: center;
+  color: #333;
+}
+
+body.dark-mode .center {
+  color: #aaa;
 }
 
 /* ================= Collapsible Section Headers ================= */
@@ -451,10 +1036,20 @@ nav button.active span {
   cursor: pointer;
   user-select: none;
   transition: all 0.2s ease;
+  color: #333;
+}
+
+body.dark-mode .section-header {
+  border-bottom-color: #444;
+  color: #e0e0e0;
 }
 
 .section-header:hover {
   background-color: #f9f9f9;
+}
+
+body.dark-mode .section-header:hover {
+  background-color: #1a1a1a;
 }
 
 .section-header .caret {
@@ -467,6 +1062,10 @@ nav button.active span {
 .section-header strong {
   font-size: 16px;
   color: #333;
+}
+
+body.dark-mode .section-header strong {
+  color: #e0e0e0;
 }
 
 /* ================= MODAL ================= */
@@ -492,30 +1091,39 @@ nav button.active span {
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-bg-light);
   width: 90%;
   max-width: 350px;
   max-height: 80vh;
   padding: 20px;
   border-radius: 12px;
-
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  overflow-y: auto; /* scroll uvnitř, když je hodně textu */
+  overflow-y: auto;
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-border);
 }
 
 .modal-content h2 {
   margin: 0 0 10px 0;
+  color: var(--color-text-dark);
+}
+
+.modal-content label {
+  color: var(--color-text-dark);
+  font-weight: 500;
 }
 
 .modal-content input,
 .modal-content textarea {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
+  background: var(--color-bg-light);
+  color: var(--color-text-dark);
+  font-family: inherit;
 }
 
 .priority-group {
@@ -527,10 +1135,12 @@ nav button.active span {
   flex: 1;
   margin-right: 6px;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #eee;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .priority-group button:last-child {
@@ -540,6 +1150,13 @@ nav button.active span {
 .priority-group button.active {
   background: #007bff;
   color: white;
+  border-color: #007bff;
+}
+
+body.dark-mode .priority-group button.active {
+  background: #4da6ff;
+  color: #0a0a0a;
+  border-color: #4da6ff;
 }
 
 .modal-actions {
@@ -559,6 +1176,11 @@ nav button.active span {
   cursor: pointer;
 }
 
+body.dark-mode .modal-actions .save {
+  background: #4da6ff;
+  color: #0a0a0a;
+}
+
 .modal-actions .cancel {
   background: #ccc;
   color: black;
@@ -567,6 +1189,11 @@ nav button.active span {
   border-radius: 6px;
   flex: 1;
   cursor: pointer;
+}
+
+body.dark-mode .modal-actions .cancel {
+  background: #444;
+  color: #e0e0e0;
 }
 
 
@@ -651,7 +1278,7 @@ body.dark-mode #tcBugBtn:hover {
   transform: translateY(-50%);
   width: 350px;
   max-height: 400px;
-  background: white;
+  background: var(--color-bg-light);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   z-index: 250;
@@ -660,26 +1287,11 @@ body.dark-mode #tcBugBtn:hover {
   animation: slideIn 0.3s ease;
 }
 
-.tc-bug-modal.hidden {
-  display: none;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-}
-
 .tc-bug-content {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: white;
+  background: var(--color-bg-light);
   border-radius: 12px;
   overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -690,8 +1302,8 @@ body.dark-mode #tcBugBtn:hover {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  background: var(--color-bg-light-secondary);
+  border-bottom: 1px solid var(--color-border);
   transition: border-color 0.3s ease;
 }
 
@@ -699,14 +1311,14 @@ body.dark-mode #tcBugBtn:hover {
   margin: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text-dark);
 }
 
 .tc-bug-header .close-btn {
   background: none;
   border: none;
   font-size: 24px;
-  color: #999;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 0;
   width: 30px;
@@ -718,14 +1330,14 @@ body.dark-mode #tcBugBtn:hover {
 }
 
 .tc-bug-header .close-btn:hover {
-  color: #333;
+  color: var(--color-text-dark);
 }
 
 .tc-bug-body {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  color: #555;
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -776,12 +1388,8 @@ body.dark-mode .calendar-tasks-container {
 .calendar-tasks-container h3 {
   margin: 0 0 15px 0;
   font-size: 16px;
-  color: #333;
+  color: var(--color-text-dark);
   font-weight: bold;
-}
-
-body.dark-mode .calendar-tasks-container h3 {
-  color: #e0e0e0;
 }
 
 .calendar-task-card {
@@ -789,7 +1397,7 @@ body.dark-mode .calendar-tasks-container h3 {
   justify-content: space-between;
   align-items: flex-start;
   padding: 12px;
-  background: #f9f9f9;
+  background: var(--color-bg-light-secondary);
   border-radius: 6px;
   margin-bottom: 10px;
   border-left: 4px solid #007bff;
@@ -797,23 +1405,23 @@ body.dark-mode .calendar-tasks-container h3 {
 }
 
 .calendar-task-card:hover {
-  background: #f0f0f0;
+  background: var(--color-bg-light);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode .calendar-task-card {
-  background: #3a3a3a;
+  background: var(--color-bg-light-secondary);
   border-left-color: #007bff;
 }
 
 body.dark-mode .calendar-task-card:hover {
-  background: #444;
+  background: var(--color-bg-light);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .calendar-task-card strong {
   font-size: 14px;
-  color: #333;
+  color: var(--color-text-dark);
 }
 
 .calendar-task-card .calendar-task-content {
@@ -824,7 +1432,7 @@ body.dark-mode .calendar-task-card:hover {
 }
 
 .calendar-task-card .calendar-task-content small {
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 12px;
   margin-top: 6px;
   word-wrap: break-word;
@@ -860,7 +1468,7 @@ body.dark-mode .calendar-task-card:hover {
 
 .card small {
   display: block;
-  color: #666;
+  color: var(--color-text-muted);
   word-wrap: break-word;
   white-space: normal;
 }
@@ -873,7 +1481,7 @@ body.dark-mode .calendar-task-card:hover {
 }
 
 body.dark-mode .calendar-task-card strong {
-  color: #e0e0e0;
+  color: var(--color-text-dark);
 }
 
 .calendar-header {
@@ -884,11 +1492,11 @@ body.dark-mode .calendar-task-card strong {
 .calendar-header h2 {
   margin: 0;
   font-size: 20px;
-  color: #333;
+  color: var(--color-text-dark);
 }
 
 body.dark-mode .calendar-header h2 {
-  color: #e0e0e0;
+  color: var(--color-text-dark);
 }
 
 .calendar-weekdays {

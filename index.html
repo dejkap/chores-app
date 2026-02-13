@@ -7,24 +7,120 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
 <body>
-  <div id="app"></div>
-
-  <!-- Control Buttons (Dark Mode + TC/Bug) -->
-  <div id="controlButtons">
-    <button id="darkModeBtn" title="Toggle Dark Mode">🌙 Dark Mode</button>
-    <button id="tcBugBtn" title="Test Cases / Bug Reports">🐛 TC/Bug</button>
+  <!-- Top Controls: Back to CV + Dark Mode -->
+  <div id="topControls">
+    <a id="backToCVBtn" class="top-btn" title="Back to CV" href="http://jaann.xyz" target="_blank" rel="noopener">← CV</a>
+    <button id="globalDarkModeBtn" class="top-btn" title="Toggle Dark Mode">🌙</button>
   </div>
 
-  <!-- TC/Bug Modal -->
-  <div id="tcBugModal" class="tc-bug-modal hidden">
-    <div class="tc-bug-content">
-      <div class="tc-bug-header">
-        <h3>Test Cases & Bug Reports</h3>
-        <button id="closeTcBugBtn" class="close-btn">×</button>
+  <div id="mainWrapper">
+    <!-- Floating tabs for collapsed panels -->
+    <button id="leftTab" class="panel-tab left-tab" title="Open Documentation">Documentation ›</button>
+    <button id="rightTab" class="panel-tab right-tab" title="Open QA Lab">‹ QA Lab</button>
+    <!-- Levý panel - Dokumentace (Collapsible) -->
+    <div id="left-panel" class="side-panel">
+      <div class="panel-header" id="leftPanelHeader">
+        <h2>Documentation</h2>
+        <button class="collapse-btn" id="collapseLeftBtn" title="Collapse panel">
+          <span class="collapse-icon">‹</span>
+        </button>
       </div>
-      <div class="tc-bug-body">
-        <p>Test cases and bug reports will appear here.</p>
-        <p>Use this section to document issues or test scenarios during development.</p>
+      <div class="panel-content" id="leftPanelContent">
+        <div class="documentation-section">
+          <h3>Roadmap (Chronological)</h3>
+          <p><strong>Phase 1: Multi-user Foundation</strong></p>
+          <p>Implementace uživatelských účtů a profilů. Rozdělení úkolů podle místností v domácnosti.</p>
+          <div class="image-placeholder">
+            <span class="image-icon">🖼️</span>
+            <div class="image-label">Household Dashboard Design</div>
+          </div>
+          <hr />
+          <p><strong>Phase 2: Logic & Routine</strong></p>
+          <p>Systém opakovaných úkolů (frekvence: dny až roky). Přidání 'Photo Proof' pro verifikaci splněné práce.</p>
+        </div>
+        <div class="documentation-section">
+          <p><strong>Phase 3: Gamification & Economy</strong></p>
+          <p>Zavedení XP a bodů za splněné úkoly. Marketplace: nákup odložení úkolu nebo jeho delegování na jiného člena (režim 'Tvrdá pravidla' vs. 'Volná ruka').</p>
+          <div class="image-placeholder">
+            <span class="image-icon">🖼️</span>
+            <div class="image-label">Points & Rewards Store</div>
+          </div>
+        </div>
+        <div class="documentation-section">
+          <p><strong>Phase 4: Analytics & Competition</strong></p>
+          <p>Veřejné statistiky domácnosti, žebříčky a 'Hot Streaks'. Focus Mode: Časovač pro rutinní práce.</p>
+        </div>
+        <div class="documentation-section">
+          <p><strong>Phase 5: Engagement</strong></p>
+          <p>Personalizované gratulace k milníkům a edukativní fun-facty o domácnosti.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Střední panel - Hlavní aplikace -->
+    <div id="middle-panel" class="main-panel">
+      <div id="app"></div>
+    </div>
+
+    <!-- Pravý panel - QA Lab (Collapsible) -->
+    <div id="qa-panel" class="side-panel">
+        <div class="panel-header" id="rightPanelHeader">
+        <h2>QA Lab</h2>
+        <div class="panel-controls">
+          <button class="collapse-btn" id="collapseRightBtn" title="Collapse panel">
+            <span class="collapse-icon">›</span>
+          </button>
+        </div>
+      </div>
+      <div class="panel-content" id="qaPanelContent">
+        <div class="qa-section">
+          <h3>Test Cases</h3>
+          <div id="qaCards" class="qa-cards">
+            <div class="tc-card collapsible">
+              <div class="tc-header"><div class="tc-id">CHOR-01</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-high">High</span> <span class="tc-component">Component: UI</span></div><div class="tc-toggle">▸</div></div>
+              <div class="tc-body">
+                <div class="tc-title">Vytvoření úkolu s vysokou prioritou</div>
+                <div class="tc-desc"><strong>Popis:</strong> Ověření, že se úkol správně uloží s příznakem 'High'.</div>
+                <div class="tc-steps"><strong>Kroky:</strong> 1. Add Task → 2. Vyplň název → 3. Zvol Priority: High → 4. Save.</div>
+                <div class="tc-result"><strong>Výsledek:</strong> Úkol je v seznamu a má červený indikátor priority.</div>
+              </div>
+            </div>
+            <div class="tc-card collapsible">
+              <div class="tc-header"><div class="tc-id">CHOR-02</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Core</span></div><div class="tc-toggle">▸</div></div>
+              <div class="tc-body">
+                <div class="tc-title">Validace prázdného pole (Negative Test)</div>
+                <div class="tc-desc"><strong>Popis:</strong> Systém nesmí dovolit uložit úkol bez názvu.</div>
+                <div class="tc-steps"><strong>Kroky:</strong> 1. Add Task → 2. Nechej název prázdný → 3. Save.</div>
+                <div class="tc-result"><strong>Výsledek:</strong> Zobrazí se error message nebo se pole zvýrazní.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="qa-section">
+          <h3>Known Issues</h3>
+          <div id="bugsList" class="bugs-list">
+            <div class="bug-card collapsible">
+              <div class="bug-header"><div class="bug-id">CHOR-BUG-01</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Calendar</span></div><div class="tc-toggle">▸</div></div>
+              <div class="bug-body"><strong>Popis:</strong> Na produkčním buildu (Vercel) se po refreshu zobrazuje prosinec 2025 místo aktuálního data.</div>
+            </div>
+            <div class="bug-card collapsible">
+              <div class="bug-header"><div class="bug-id">CHOR-03</div><div class="tc-meta"><span class="tc-reporter">Reporter: User</span> <span class="tc-priority priority-high">High</span> <span class="tc-component">Component: UI</span></div><div class="tc-toggle">▸</div></div>
+              <div class="bug-body">
+                <div class="bug-title"><strong>Persistence nastavení Dark Mode</strong></div>
+                <div class="bug-desc"><strong>Description:</strong> Po obnovení stránky (F5) se aplikace vrátí do Light Mode, i když byl aktivní Dark Mode.</div>
+                <div class="bug-steps"><strong>Actual/Expected:</strong> Změna se neukládá do LocalStorage. Očekává se trvalé uložení volby.</div>
+              </div>
+            </div>
+            <div class="bug-card collapsible">
+              <div class="bug-header"><div class="bug-id">CHOR-04</div><div class="tc-meta"><span class="tc-reporter">Reporter: User</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Calendar</span></div><div class="tc-toggle">▸</div></div>
+              <div class="bug-body">
+                <div class="bug-title"><strong>Překrývání textu v Calendar View</strong></div>
+                <div class="bug-desc"><strong>Description:</strong> Při zadání názvu úkolu delšího než 30 znaků text v kalendáři přetéká mimo vyhrazený box.</div>
+                <div class="bug-steps"><strong>Steps:</strong> 1. Otevři Calendar → 2. Přidej task s extrémně dlouhým názvem.</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
