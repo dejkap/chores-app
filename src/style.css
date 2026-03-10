@@ -486,9 +486,12 @@ body.dark-mode #addTaskBtn {
 /* Floating tabs - modern pill-shaped design */
 .panel-tab {
   position: absolute;
-  top: calc(50% - (var(--app-height) / 2)); /* align with top of app */
-  width: 40px;
-  height: 120px;
+  /* position slightly lower to line up with the top of the white app area */
+  top: 40px;
+  /* make tabs horizontal so text is easy to read */
+  width: auto;
+  height: 40px;
+  padding: 6px 12px;
   display: none; /* shown only when collapsed via JS */
   align-items: center;
   justify-content: center;
@@ -498,7 +501,6 @@ body.dark-mode #addTaskBtn {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: none;
-  padding: 6px;
   font-size: 12px;
   border-radius: 12px;
   transition: all 0.2s ease;
@@ -523,21 +525,16 @@ body.dark-mode .panel-tab:hover {
 
 .panel-tab { pointer-events: auto; }
 
+/* left button sits just outside the app container */
 .panel-tab.left-tab {
-  left: calc(50% - (var(--app-width) / 2) - 40px - 8px);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: scaleX(-1);
-  display: flex;
-  flex-direction: column-reverse;
+  left: calc(50% - (var(--app-width) / 2) - 8px);
+  /* shift left by its own width so it hugs the panel edge regardless of content size */
+  transform: translateX(-100%);
 }
 
+/* right button similarly positioned */
 .panel-tab.right-tab {
   left: calc(50% + (var(--app-width) / 2) + 8px);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  display: flex;
-  flex-direction: column;
 }
 
 /* QA card sizing and metadata */
@@ -1083,7 +1080,8 @@ body.dark-mode .section-header strong {
   justify-content: center;
   align-items: center;
 
-  z-index: 200;
+  /* place over everything including side panels */
+  z-index: 10000;
 }
 
 .modal.hidden {
@@ -1790,18 +1788,6 @@ body.dark-mode .settings-option label {
   transform: translateY(-2px);
 }
 
-.settings-info {
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 6px;
-  border-left: 4px solid #007bff;
-}
-
-body.dark-mode .settings-info {
-  background: #3a3a3a;
-  border-left-color: #007bff;
-}
-
 .settings-info p {
   margin: 5px 0;
   color: #666;
@@ -1852,4 +1838,652 @@ body.dark-mode .settings-info p {
 
 body.dark-mode .task-action-icon:hover {
   background: rgba(100, 150, 255, 0.2);
+}
+
+/* ================= QA LAB STYLES ================= */
+.qa-dashboard {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--color-bg-light-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.dashboard-item {
+  text-align: center;
+  flex: 1;
+}
+
+.dashboard-value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--color-text-dark);
+}
+
+.dashboard-value.pass {
+  color: #28a745;
+}
+
+.dashboard-value.fail {
+  color: #dc3545;
+}
+
+.dashboard-label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 5px;
+}
+
+.export-btn {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: background 0.2s ease;
+}
+
+.export-btn:hover {
+  background: #0056b3;
+}
+
+.qa-accordion {
+  margin-top: 20px;
+}
+
+.accordion-section {
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.accordion-header {
+  padding: 12px 15px;
+  background: var(--color-bg-light-secondary);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: var(--color-text-dark);
+  transition: background 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: var(--color-bg-light);
+}
+
+.toggle-icon {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.accordion-content {
+  display: none;
+  padding: 0;
+}
+
+.tc-item, .bug-item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tc-item:last-child, .bug-item:last-child {
+  border-bottom: none;
+}
+
+.tc-summary, .bug-summary {
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-light);
+  transition: background 0.2s ease, all 0.2s ease;
+  /* collapsed by default: no wrap, single line items */
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative; /* for absolute arrow positioning when expanded */
+  border: 1px solid transparent; /* prevents shift if borders added later */
+}
+
+/* when the row is expanded, use a grid layout for precise alignment */
+.tc-summary.expanded {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  white-space: normal;
+  overflow: visible;
+}
+
+/* Bug headers stay locked on one top row even when expanded. */
+.bug-summary.expanded {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Never allow BUG id, badges, or arrow to wrap when expanded. */
+.bug-summary.expanded .tc-id,
+.bug-summary.expanded .tc-badges,
+.bug-summary.expanded .tc-toggle {
+  flex: 0 0 auto;
+}
+
+/* Stack badges for expanded TCs only when JS marks it as necessary. */
+.tc-summary.expanded.stack-badges {
+  display: grid;
+  grid-template-columns: minmax(55px, auto) 1fr auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "id title toggle"
+    ". badges .";
+  gap: 4px 10px;
+}
+
+.tc-summary.expanded.stack-badges .tc-id {
+  grid-area: id;
+  align-self: start;
+}
+
+.tc-summary.expanded.stack-badges .tc-title {
+  grid-area: title;
+  align-self: start;
+  white-space: normal;
+}
+
+.tc-summary.expanded.stack-badges .tc-badges {
+  grid-area: badges;
+  grid-column: 2;
+  margin: 0;
+  gap: 6px;
+}
+
+.tc-summary.expanded.stack-badges .tc-toggle {
+  grid-area: toggle;
+  justify-self: end;
+  align-self: center;
+  margin-left: 0;
+}
+
+.tc-summary:hover, .bug-summary:hover {
+  background: var(--color-bg-light-secondary);
+}
+
+.tc-id {
+  font-weight: bold;
+  color: #007bff;
+  min-width: 55px;
+  width: 55px;
+  /* unify spacing and use primary font */
+  /* margin-right removed; spacing controlled by container gap */
+  font-family: inherit;
+}
+
+.tc-title {
+  flex: 1;
+  /* margin-left removed; spacing controlled via gap on container */
+  font-size: 14px;
+  color: var(--color-text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* expanded title allows wrapping and normal whitespace */
+.tc-summary.expanded .tc-title {
+  white-space: nowrap;
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
+}
+
+.tc-summary.expanded .tc-id { align-self: start; }
+
+/* badges container displays inline by default, repositioned when expanded */
+.tc-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* bug header keeps badges on one row next to BUG-XX */
+.bug-summary .tc-badges {
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* removed individual badge margin rules; spacing now handled by .tc-badges container */
+
+
+.tc-status, .bug-severity, .bug-priority {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tc-status.pass {
+  background: #d4edda;
+  color: #155724;
+}
+
+.tc-status.fail {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.tc-defect {
+  background: #dc3545;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+
+/* Defect Log badge system: Severity + Priority */
+.bug-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* Severity scale */
+.bug-badge.severity-high {
+  background: #dc3545;
+  color: #ffffff;
+}
+
+.bug-badge.severity-medium {
+  background: #fd7e14;
+  color: #ffffff;
+}
+
+.bug-badge.severity-minor,
+.bug-badge.severity-low {
+  background: #f59e0b;
+  color: #111827;
+}
+
+/* Priority scale */
+.bug-badge.priority-high {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.bug-badge.priority-medium {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.bug-badge.priority-low {
+  background: #0d9488;
+  color: #ffffff;
+}
+
+.bug-severity {
+  background: #f8f9fa;
+  color: var(--color-text-dark);
+}
+
+.tc-toggle, .bug-toggle {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  align-self: center;
+  /* keep toggle from shrinking when text is long */
+  flex-shrink: 0;
+  /* animate rotation consistently for both types */
+  transition: transform 0.3s ease-in-out;
+}
+
+.tc-details, .bug-details {
+  display: none;
+  padding: 15px 16px 15px calc(16px + 55px + 10px);
+  background: var(--color-bg-light-secondary);
+  border-top: 1px solid var(--color-border);
+}
+
+.tc-details div, .bug-details div {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.tc-details div:last-child, .bug-details div:last-child {
+  margin-bottom: 0;
+}
+
+.tc-preconditions, .tc-steps, .tc-expected,
+.bug-description, .bug-actual-expected, .tc-status-detail {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.tc-steps br, .bug-description br, .bug-actual-expected br {
+  display: block;
+  margin: 5px 0;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .qa-dashboard {
+  background: #2d2d2d;
+}
+
+body.dark-mode .accordion-header {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .accordion-header:hover {
+  background: #3a3a3a;
+}
+
+body.dark-mode .tc-summary, body.dark-mode .bug-summary {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .tc-summary:hover, body.dark-mode .bug-summary:hover {
+  background: #2d2d2d;
+}
+
+body.dark-mode .tc-details, body.dark-mode .bug-details {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .tc-status.pass {
+  background: #1e3a2a;
+  color: #7cbd7a;
+}
+
+body.dark-mode .tc-status.fail {
+  background: #3a1e1e;
+  color: #e07a7a;
+}
+
+body.dark-mode .tc-defect {
+  background: #721c24;
+  color: #f5c6cb;
+}
+
+/* Legacy bug-card and bug-summary overrides removed; bugs now share TC styles */
+
+/* keep bug-details and related detail styling for bug content */
+.bug-details {
+  padding: 16px 16px 16px calc(16px + 55px + 10px);
+  border-top: 1px solid #dee2e6;
+  background: #fff;
+  display: none;
+}
+
+.bug-details.expanded {
+  display: block;
+}
+
+.bug-description {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.bug-steps {
+  margin-bottom: 12px;
+}
+
+.bug-steps h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.bug-steps ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.bug-steps li {
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+}
+
+.bug-expected {
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.bug-actual {
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.bug-environment {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Dark mode adjustments remain for bug-details and summary via shared selectors */
+
+/* dark mode colors for meta and toggles (now using tc- classes) */
+body.dark-mode .tc-toggle {
+  color: #b0b0b0;
+}
+/* .bug-meta no longer used */
+
+body.dark-mode .bug-details {
+  background: #1a1a1a;
+  border-top-color: #404040;
+}
+
+body.dark-mode .bug-description {
+  color: #e0e0e0;
+}
+
+body.dark-mode .bug-steps h4 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .bug-steps li {
+  color: #b0b0b0;
+}
+
+body.dark-mode .bug-expected,
+body.dark-mode .bug-actual,
+body.dark-mode .bug-environment {
+  color: #b0b0b0;
+}
+
+/* QA Header Styles */
+.qa-header {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.execution-summary, .test-environment {
+  flex: 1;
+  min-width: 250px;
+}
+
+.execution-summary h3, .test-environment h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.execution-summary p, .test-environment p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Defect Legend */
+.defect-legend {
+  background: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.defect-legend h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.legend-row span:first-child {
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.legend-description {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+
+/* Bug title in details */
+.bug-title-full {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+/* Unified toggle animation */
+.toggle-icon.expanded,
+.tc-toggle.expanded,
+.bug-toggle.expanded {
+  transform: rotate(180deg);
+}
+
+/* Dark mode for new elements */
+body.dark-mode .qa-header {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+body.dark-mode .execution-summary h3,
+body.dark-mode .test-environment h3 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .execution-summary p,
+body.dark-mode .test-environment p {
+  color: #b0b0b0;
+}
+
+body.dark-mode .defect-legend {
+  background: #3a3a3a;
+  border-color: #404040;
+  color: #b0b0b0;
+}
+
+body.dark-mode .defect-legend h4 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .legend-description {
+  color: #b0b0b0;
+}
+
+
+/* Settings info box (uses transparent dark background in dark mode) */
+.settings-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+  color: #666;
+  font-size: 14px;
+}
+
+body.dark-mode .settings-info {
+  background: rgba(0, 0, 0, 0.5);
+  border-left-color: #4da6ff;
+  color: #ccc;
+}
+
+/* Sort dropdown styling */
+.sort-container {
+  margin-bottom: 15px;
+}
+
+.sort-label {
+  font-size: 14px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.sort-dropdown {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-light-secondary);
+  color: var(--color-text-dark);
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.sort-dropdown:hover,
+.sort-dropdown:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+body.dark-mode .sort-dropdown {
+  background: var(--color-bg-light);
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .sort-dropdown:hover,
+body.dark-mode .sort-dropdown:focus {
+  border-color: #4da6ff;
+}
+
+body.dark-mode .bug-title-full {
+  color: #e0e0e0;
 }

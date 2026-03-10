@@ -43,8 +43,8 @@ export function Settings() {
         <p style="color: #999; font-size: 12px;">A simple task management application for organizing daily chores and activities.</p>
       </div>
 
-      <div class="settings-info" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; border-left: 4px solid #007bff;">
-        <p style="margin: 0; color: #666; font-size: 14px;">
+      <div class="settings-info">
+        <p>
           <strong>More settings coming soon:</strong> Custom themes, task reminders, recurring tasks, and more.
         </p>
       </div>

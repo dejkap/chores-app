@@ -9,14 +9,14 @@
 <body>
   <!-- Top Controls: Back to CV + Dark Mode -->
   <div id="topControls">
-    <a id="backToCVBtn" class="top-btn" title="Back to CV" href="http://jaann.xyz" target="_blank" rel="noopener">← CV</a>
+    <a id="backToCVBtn" class="top-btn" title="Back to CV" href="https://www.jaann.xyz">← CV</a>
     <button id="globalDarkModeBtn" class="top-btn" title="Toggle Dark Mode">🌙</button>
   </div>
 
   <div id="mainWrapper">
     <!-- Floating tabs for collapsed panels -->
-    <button id="leftTab" class="panel-tab left-tab" title="Open Documentation">Documentation ›</button>
-    <button id="rightTab" class="panel-tab right-tab" title="Open QA Lab">‹ QA Lab</button>
+    <button id="leftTab" class="panel-tab left-tab" title="Open Documentation">&lt; Documentation</button>
+    <button id="rightTab" class="panel-tab right-tab" title="Open QA Lab">QA Lab &gt;</button>
     <!-- Levý panel - Dokumentace (Collapsible) -->
     <div id="left-panel" class="side-panel">
       <div class="panel-header" id="leftPanelHeader">
@@ -27,33 +27,47 @@
       </div>
       <div class="panel-content" id="leftPanelContent">
         <div class="documentation-section">
-          <h3>Roadmap (Chronological)</h3>
-          <p><strong>Phase 1: Multi-user Foundation</strong></p>
-          <p>Implementace uživatelských účtů a profilů. Rozdělení úkolů podle místností v domácnosti.</p>
-          <div class="image-placeholder">
-            <span class="image-icon">🖼️</span>
-            <div class="image-label">Household Dashboard Design</div>
-          </div>
-          <hr />
-          <p><strong>Phase 2: Logic & Routine</strong></p>
-          <p>Systém opakovaných úkolů (frekvence: dny až roky). Přidání 'Photo Proof' pro verifikaci splněné práce.</p>
-        </div>
-        <div class="documentation-section">
-          <p><strong>Phase 3: Gamification & Economy</strong></p>
-          <p>Zavedení XP a bodů za splněné úkoly. Marketplace: nákup odložení úkolu nebo jeho delegování na jiného člena (režim 'Tvrdá pravidla' vs. 'Volná ruka').</p>
-          <div class="image-placeholder">
-            <span class="image-icon">🖼️</span>
-            <div class="image-label">Points & Rewards Store</div>
-          </div>
-        </div>
-        <div class="documentation-section">
-          <p><strong>Phase 4: Analytics & Competition</strong></p>
-          <p>Veřejné statistiky domácnosti, žebříčky a 'Hot Streaks'. Focus Mode: Časovač pro rutinní práce.</p>
-        </div>
-        <div class="documentation-section">
-          <p><strong>Phase 5: Engagement</strong></p>
-          <p>Personalizované gratulace k milníkům a edukativní fun-facty o domácnosti.</p>
-        </div>
+          <h3>Project Overview & Philosophy</h3>
+          <p>Chores-App is a privacy-centric task management ecosystem designed to transform mundane household maintenance into a competitive, gamified experience.</p>
+          <p>The core philosophy addresses two modern challenges:</p>
+          <ul>
+            <li><strong>Data Sovereignty</strong>: Unlike mainstream productivity apps, Chores-App is built for users who want to manage their private household routines without sharing behavioral data with third-party corporations.</li>
+            <li><strong>Domestic Friction</strong>: By applying RPG-style mechanics to household chores, we turn “who’s turn it is to wash the dishes” into a strategic competition, embodying the “Chores as a Sport” concept.</li>
+          </ul>
+      </div>
+      <div class="documentation-section">
+          <h3>Current MVP Status (Phase 0)</h3>
+          <p>The application currently serves as a functional proof of concept with a strong technical foundation emphasizing privacy and data integrity:</p>
+          <ul>
+            <li>Full CRUD lifecycle: create, edit, delete, and complete tasks.</li>
+            <li>Three-tier priority system (Low, Normal, High).</li>
+            <li>Real-time persistence via Supabase backend.</li>
+            <li>Bi-directional calendar synchronization.</li>
+            <li>QA Lab environment for tracking happy, negative, and edge-case paths.</li>
+          </ul>
+      </div>
+      <div class="documentation-section">
+          <h3>Extended Roadmap (The Vision)</h3>
+          <p>Built on a privacy-first mission and the idea of “Chores as a Sport,” the roadmap unfolds across multiple phases:</p>
+          <p><strong>Phase 1: Multi-user Foundation & Household Structure</strong><br>
+          User identity with profiles and avatars; household hierarchy by rooms; shared state dashboard for real-time visibility.</p>
+          <p><strong>Phase 2: Logic, Routine & Verification</strong><br>
+          Advanced recurrence engine (daily to yearly); photo proof layer for completion verification; comprehensive task history logs.</p>
+          <p><strong>Phase 3: The Gamification Economy</strong><br>
+          XP and rewards, marketplace for postponing or delegating tasks; dual rule modes—“Free Hand” vs. “Hard Rules”—where points govern flexibility.</p>
+          <p><strong>Phase 4: Analytics & Competitive Chores</strong><br>
+          Leaderboards, hot streak bonuses, Focus Mode (timer, anti‑distraction lock, personal bests) turning chores into measurable athletic events.</p>
+          <p><strong>Phase 5: Engagement & Retention</strong><br>
+          Achievement milestones, educational fun facts, and AI-driven personalized insights to maintain long-term engagement.</p>
+      </div>
+      <div class="documentation-section">
+          <h3>Technical Stack (Current)</h3>
+          <ul>
+            <li>Frontend: React with Tailwind CSS</li>
+            <li>Backend/Auth: Supabase</li>
+            <li>Hosting/Environment: Vercel</li>
+          </ul>
+      </div>
       </div>
     </div>
 
@@ -73,54 +87,7 @@
         </div>
       </div>
       <div class="panel-content" id="qaPanelContent">
-        <div class="qa-section">
-          <h3>Test Cases</h3>
-          <div id="qaCards" class="qa-cards">
-            <div class="tc-card collapsible">
-              <div class="tc-header"><div class="tc-id">CHOR-01</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-high">High</span> <span class="tc-component">Component: UI</span></div><div class="tc-toggle">▸</div></div>
-              <div class="tc-body">
-                <div class="tc-title">Vytvoření úkolu s vysokou prioritou</div>
-                <div class="tc-desc"><strong>Popis:</strong> Ověření, že se úkol správně uloží s příznakem 'High'.</div>
-                <div class="tc-steps"><strong>Kroky:</strong> 1. Add Task → 2. Vyplň název → 3. Zvol Priority: High → 4. Save.</div>
-                <div class="tc-result"><strong>Výsledek:</strong> Úkol je v seznamu a má červený indikátor priority.</div>
-              </div>
-            </div>
-            <div class="tc-card collapsible">
-              <div class="tc-header"><div class="tc-id">CHOR-02</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Core</span></div><div class="tc-toggle">▸</div></div>
-              <div class="tc-body">
-                <div class="tc-title">Validace prázdného pole (Negative Test)</div>
-                <div class="tc-desc"><strong>Popis:</strong> Systém nesmí dovolit uložit úkol bez názvu.</div>
-                <div class="tc-steps"><strong>Kroky:</strong> 1. Add Task → 2. Nechej název prázdný → 3. Save.</div>
-                <div class="tc-result"><strong>Výsledek:</strong> Zobrazí se error message nebo se pole zvýrazní.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="qa-section">
-          <h3>Known Issues</h3>
-          <div id="bugsList" class="bugs-list">
-            <div class="bug-card collapsible">
-              <div class="bug-header"><div class="bug-id">CHOR-BUG-01</div><div class="tc-meta"><span class="tc-reporter">Reporter: GitHub Copilot</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Calendar</span></div><div class="tc-toggle">▸</div></div>
-              <div class="bug-body"><strong>Popis:</strong> Na produkčním buildu (Vercel) se po refreshu zobrazuje prosinec 2025 místo aktuálního data.</div>
-            </div>
-            <div class="bug-card collapsible">
-              <div class="bug-header"><div class="bug-id">CHOR-03</div><div class="tc-meta"><span class="tc-reporter">Reporter: User</span> <span class="tc-priority priority-high">High</span> <span class="tc-component">Component: UI</span></div><div class="tc-toggle">▸</div></div>
-              <div class="bug-body">
-                <div class="bug-title"><strong>Persistence nastavení Dark Mode</strong></div>
-                <div class="bug-desc"><strong>Description:</strong> Po obnovení stránky (F5) se aplikace vrátí do Light Mode, i když byl aktivní Dark Mode.</div>
-                <div class="bug-steps"><strong>Actual/Expected:</strong> Změna se neukládá do LocalStorage. Očekává se trvalé uložení volby.</div>
-              </div>
-            </div>
-            <div class="bug-card collapsible">
-              <div class="bug-header"><div class="bug-id">CHOR-04</div><div class="tc-meta"><span class="tc-reporter">Reporter: User</span> <span class="tc-priority priority-medium">Medium</span> <span class="tc-component">Component: Calendar</span></div><div class="tc-toggle">▸</div></div>
-              <div class="bug-body">
-                <div class="bug-title"><strong>Překrývání textu v Calendar View</strong></div>
-                <div class="bug-desc"><strong>Description:</strong> Při zadání názvu úkolu delšího než 30 znaků text v kalendáři přetéká mimo vyhrazený box.</div>
-                <div class="bug-steps"><strong>Steps:</strong> 1. Otevři Calendar → 2. Přidej task s extrémně dlouhým názvem.</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Dynamic content loaded from report.md -->
       </div>
     </div>
   </div>
